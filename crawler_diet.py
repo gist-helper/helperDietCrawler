@@ -1,22 +1,39 @@
 import os
+from time import sleep
 import requests
 from bs4 import BeautifulSoup as bs
 
-recentDietDivNumKor = 2
-recentDietDivNumEng = 3
+def sleepCrawler(msg):
+    # for avoid block ip! 
+    print("------------------------------------")
+    print("for avoid block ip!")
+    print(msg)
+    sleep(10)
+    print("------------------------------------")
 
 def getDietImg(url, bldgType, langType):
+    sleepCrawler("Initialize Crawler...")
     webpage = requests.get(url)
-    if(langType == 0):
-        dietSrc = bs(webpage.content, "html.parser").select(".inner")[recentDietDivNumKor].img.get("src")
-    else:
-        dietSrc = bs(webpage.content, "html.parser").select(".inner")[recentDietDivNumEng].img.get("src")
-    recentDietSrc = os.path.join(url, dietSrc)
-    print(recentDietSrc)
-    recentDietImg = requests.get(recentDietSrc).content
+    webpageHtml = bs(webpage.content, "html.parser")
+    mealDiv = webpageHtml.find('div', class_ = 'bd_item_box')
+    mealHref = mealDiv.find('a').get("href")
+    mealNum = mealHref.split("=")[-1]
+    mealSrc = url + "?mode=IMG&no={}&file_id=".format(mealNum)
+    
+    print()
+    print("Image Src: ")
+    print(mealSrc)
+    print()
+
+    sleepCrawler("Request Image...")
+    mealImg = requests.get(mealSrc).content
     imgPath = os.path.join("img", str(bldgType) + '_' + str(langType) + '.jpg')
     with open(imgPath, 'wb') as imgFile:
-        imgFile.write(recentDietImg)
+        imgFile.write(mealImg)
+        print()
+        print("Saved Image at: ")
+        print(imgPath)
+        print()
 
 if __name__ == "__main__":
     bldg_0_0_url = "https://www.gist.ac.kr/kr/html/sub05/050601.html"
@@ -27,6 +44,7 @@ if __name__ == "__main__":
     getDietImg(bldg_2_0_url, 2, 0)
     bldg_0_1_url = "https://www.gist.ac.kr/en/html/sub05/051201.html"
     getDietImg(bldg_0_1_url, 0, 1)
+    #TODO no thumbnail
     #bldg_1_1_url = "https://www.gist.ac.kr/en/html/sub05/051202.html"
     #getDietImg(bldg_1_1_url, 1, 1)
     bldg_2_1_url = "https://www.gist.ac.kr/en/html/sub05/051203.html"
