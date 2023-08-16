@@ -20,7 +20,7 @@ if __name__ == "__main__":
                 img_path = os.path.join(img_root_dir, img_filename)
                 print(img_path)
                 
-                img = {'media': open(img_path, 'rb')}
+                img = {'file': open(img_path, 'rb')}
                 response = requests.post(url, files=img)
                 print(response)
                 print()
